@@ -30,6 +30,8 @@ Timer.prototype.tick = function () {
 
 function GameEngine() {
     this.entities = [];
+    this.players = []; // the two batteling.
+    this.bases = []; //bases the players can make.
     this.showOutlines = false;
     this.ctx = null;
     this.click = null;
@@ -99,18 +101,35 @@ GameEngine.prototype.addEntity = function (entity) {
     this.entities.push(entity);
 }
 
+GameEngine.prototype.addPlayer = function (entity) {
+    console.log('added player');
+    this.players.push(entity);
+}
+
+GameEngine.prototype.addBase = function (entity) {
+    console.log('added base');
+    this.bases.push(entity);
+}
+
 GameEngine.prototype.draw = function () {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.ctx.save();
     for (var i = 0; i < this.entities.length; i++) {
         this.entities[i].draw(this.ctx);
     }
+    for (var i = 0; i < this.players.length; i++) {
+        this.players[i].draw(this.ctx);
+    }
+    for (var i = 0; i < this.bases.length; i++) {
+        this.bases[i].draw(this.ctx);
+    }
     this.ctx.restore();
 }
 
 GameEngine.prototype.update = function () {
     var entitiesCount = this.entities.length;
-
+    var playerCount = this.players.length; // the amount of players current. 
+    var baseCount = this.bases.length; // the amount of bases current. 
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
 
@@ -122,6 +141,34 @@ GameEngine.prototype.update = function () {
     for (var i = this.entities.length - 1; i >= 0; --i) {
         if (this.entities[i].removeFromWorld) {
             this.entities.splice(i, 1);
+        }
+    }
+
+    for (var i = 0; i < playerCount; i++) { // player updates
+        var entity = this.players[i];
+
+        if (!entity.removeFromWorld) {
+            entity.update();
+        }
+    }
+
+    for (var i = this.players.length - 1; i >= 0; --i) { // remove a player (destroyed)
+        if (this.players[i].removeFromWorld) {
+            this.players.splice(i, 1);
+        }
+    }
+
+    for (var i = 0; i < playerCount; i++) { // base updates
+        var entity = this.players[i];
+
+        if (!entity.removeFromWorld) {
+            entity.update();
+        }
+    }
+
+    for (var i = this.players.length - 1; i >= 0; --i) { // remove a base (destroyed)
+        if (this.players[i].removeFromWorld) {
+            this.players.splice(i, 1);
         }
     }
 }
@@ -168,6 +215,6 @@ Entity.prototype.rotateAndCache = function (image, angle) {
     offscreenCtx.drawImage(image, -(image.width / 2), -(image.height / 2));
     offscreenCtx.restore();
     //offscreenCtx.strokeStyle = "red";
-    //offscreenCtx.strokeRect(0,0,size,size);
+    //offscreenCtx.strokeRect(0,0,size,size);/
     return offscreenCanvas;
 }
