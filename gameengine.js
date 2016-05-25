@@ -129,7 +129,7 @@ GameEngine.prototype.draw = function () {
 GameEngine.prototype.update = function () {
     var entitiesCount = this.entities.length;
     var playerCount = this.players.length; // the amount of players current. 
-    var baseCount = this.bases.length; // the amount of bases current. 
+    var baseCount = this.bases.length; // the amount of bases current.  
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
 
@@ -158,17 +158,17 @@ GameEngine.prototype.update = function () {
         }
     }
 
-    for (var i = 0; i < playerCount; i++) { // base updates
-        var entity = this.players[i];
+    for (var i = 0; i < baseCount; i++) { // base updates
+        var entity = this.bases[i];
 
         if (!entity.removeFromWorld) {
             entity.update();
         }
     }
 
-    for (var i = this.players.length - 1; i >= 0; --i) { // remove a base (destroyed)
-        if (this.players[i].removeFromWorld) {
-            this.players.splice(i, 1);
+    for (var i = this.bases.length - 1; i >= 0; --i) { // remove a base (destroyed)
+        if (this.bases[i].removeFromWorld) {
+            this.bases.splice(i, 1);
         }
     }
 }
