@@ -439,7 +439,7 @@ window.onload = (function () {
         var player = new Player(gameEngine, i);
         gameEngine.addPlayer(player);
     }
-    for (var i = 0; i < 40; i++) {
+    for (var i = 0; i < 100; i++) {
         var resource = new Resource(gameEngine);
         gameEngine.addEntity(resource);
     }
