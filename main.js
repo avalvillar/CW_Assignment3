@@ -435,11 +435,11 @@ window.onload = (function () {
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
     gameEngine = new GameEngine();
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 2; i++) {
         var player = new Player(gameEngine, i);
         gameEngine.addPlayer(player);
     }
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 60; i++) {
         var resource = new Resource(gameEngine);
         gameEngine.addEntity(resource);
     }
