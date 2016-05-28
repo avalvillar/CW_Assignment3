@@ -1,3 +1,18 @@
+/*
+Comutational Worlds: Assignment 2
+
+The two colors (red/blue) are the players and they will chase down resources 
+(the white balls) - each resource obsorbed the players radius will increase by 1
+and finally once all resources are gone, two bases of their own color will form
+and fire ships torwards the other base. The amount of ships that can be sent out 
+is 1:1 to the amount of resources gathered. If an enemy ship hits a base 5 times 
+the base is destroyed. This could lead to different players winning or even 
+a draw. This assignment and code is mostly built off of the code provided by 
+Professor Dr. Chris Marriott.
+
+Author: Antonio V. Alvillar
+*/
+
 //////////////////////               PLAYERS              ////////////////////////////////////////////////////////////////////////////////
 function Player(game, num) {
     this.radius = 10;
@@ -435,11 +450,11 @@ window.onload = (function () {
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
     gameEngine = new GameEngine();
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < 2; i++) {   /// (i < 2) up to the number 4 in order to have max 4 players. 
         var player = new Player(gameEngine, i);
         gameEngine.addPlayer(player);
     }
-    for (var i = 0; i < 60; i++) {
+    for (var i = 0; i < 60; i++) {  /// The white balls, more players should have more resources change (i < 60)
         var resource = new Resource(gameEngine);
         gameEngine.addEntity(resource);
     }
