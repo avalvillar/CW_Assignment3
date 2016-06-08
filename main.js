@@ -414,6 +414,8 @@ Ship.prototype.draw = function (ctx) {
     ctx.closePath();
 }
 
+
+
 ///////////////       MAIN CODE           //////////////////////////////////////////
 var friction = 1;
 var acceleration = 1000000;
@@ -447,6 +449,8 @@ Entity.prototype.collideBottom = function () {
 };
 
 window.onload = (function () {
+    ///////////////       Socket CODE     /////////////////////
+    var socket = io.connect("http://76.28.150.193:8888");
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
     gameEngine = new GameEngine();
@@ -458,6 +462,125 @@ window.onload = (function () {
         var resource = new Resource(gameEngine);
         gameEngine.addEntity(resource);
     }
+    //// socket console fuctions
+    socket.on("connect", function () {
+        console.log("Socket connected.")
+    });
+    socket.on("disconnect", function () {
+        console.log("Socket disconnected.")
+    });
+    socket.on("reconnect", function () {
+        console.log("Socket reconnected.")
+    });
+    ///////////////       DataBase CODE     /////////////////////
+    var saveButton = document.getElementById("save");
+    saveButton.onclick = (function () {
+        console.log("saving stuff");
+        var savedState = {resources: [], players: [], bases: []};
+        if (gameEngine.entities.length > 0) {
+            for (var i = 0; i < gameEngine.entities.length; i++) {
+                var info = { Radius: null, VisiualRadius: null, Color: null, It: null, Velocity: {X: null, Y: null}, X: null, Y: null };
+                info.Radius = gameEngine.entities[i].radius;
+                info.VisiualRadius = gameEngine.entities[i].visualRadius;
+                info.Color = gameEngine.entities[i].color;
+                info.It = gameEngine.entities[i].it;
+                info.Velocity.X = gameEngine.entities[i].velocity.X;
+                info.Velocity.Y = gameEngine.entities[i].velocity.Y;
+                info.X = gameEngine.entities[i].x;
+                info.Y = gameEngine.entities[i].y;
+                savedState.resources.push(info);
+            }
+        }
+        if (gameEngine.players.length > 0) {
+            for (var i = 0; i < gameEngine.players.length; i++) {
+                var info = { Radius: null, VisiualRadius: null, Color: null, Velocity: {X: null, Y: null}, X: null, Y: null };
+                info.Radius = gameEngine.players[i].radius;
+                info.VisiualRadius = gameEngine.players[i].visualRadius;
+                info.Color = gameEngine.players[i].color;
+                info.Velocity.X = gameEngine.players[i].velocity.X;
+                info.Velocity.Y = gameEngine.players[i].velocity.Y;
+                info.X = gameEngine.players[i].x;
+                info.Y = gameEngine.players[i].y;
+                savedState.players.push(info);
+            }
+        }
+        if (gameEngine.bases.length > 0) {
+            for (var i = 0; i < gameEngine.bases.length; i++) {
+                var info = { Color: null, Count: null, X: null, Y: null };
+                info.Color = gameEngine.bases[i].color;
+                info.Count = gameEngine.bases[i].count;
+                info.X = gameEngine.bases[i].x;
+                info.Y = gameEngine.bases[i].y;
+                savedState.bases.push(info);
+            }
+        }
+        console.log(savedState);
+        socket.emit("save", { studentname: "Antonio V. Alvillar", statename: "theSavedState", data: savedState });
+    });
+    var loadButton = document.getElementById("load");
+    loadButton.onclick = (function () {
+        console.log("loading stuff");
+        socket.emit("load", { studentname: "Antonio V. Alvillar", statename: "theSavedState" });
+    });
+
+    socket.on("load", function (data) {
+        /*
+        There is an error I am unable to correct still when loading the entities back. It just isnt quite righ. 
+        The players do not chase the resources upon load and if the bases are present with no players then load
+        only spawns the ships but doesnt show a base. Then the ships move slowly.
+        */
+        console.log(data);
+        gameEngine.entities = [];
+        gameEngine.bases = [];
+        gameEngine.players = [];
+        if (data.data.bases.length > 0) {
+            for (var i = 0; i < data.data.bases.length; i++) {
+                var base = new Base(gameEngine, data.data.bases[i].X, data.data.bases[i].Y, data.data.bases[i].Color, data.data.bases[i].Count);
+                gameEngine.addBase(base);
+            }
+        }
+        if (data.data.resources.length > 0 && gameEngine.bases.length > 0) {
+            for (var i = 0; i < data.data.resources.length; i++) {
+                var ship = new Ship(gameEngine, data.data.resources[i].X, data.data.resources[i].Y, data.data.resources[i].Color);
+                ship.radius = data.data.resources[i].Radius;
+                ship.visualRadius = data.data.resources[i].VisualRadius;
+                //ship.color = data.data.resources[i].Color;
+                ship.it = data.data.resources[i].it;
+                ship.velocity.X = data.data.resources[i].Velocity.X;
+                ship.velocity.Y = data.data.resources[i].Velocity.Y;
+                //ship.x = data.data.resources[i].X;
+                //ship.y = data.data.resources[i].Y;
+                gameEngine.addEntity(ship);
+            }
+        } else {
+            for (var i = 0; i < data.data.resources.length; i++) {
+                var resource = new Resource(gameEngine);
+                resource.radius = data.data.resources[i].Radius;
+                resource.visualRadius = data.data.resources[i].VisualRadius;
+                resource.color = data.data.resources[i].Color;
+                resource.it = data.data.resources[i].it;
+                resource.velocity.X = data.data.resources[i].Velocity.X;
+                resource.velocity.Y = data.data.resources[i].Velocity.Y;
+                resource.x = data.data.resources[i].X;
+                resource.y = data.data.resources[i].Y;
+                gameEngine.addEntity(resource);
+            }
+        }
+        if (data.data.players.length > 0) {
+            for (var i = 0; i < data.data.players.length; i++) {
+                var player = new Player(gameEngine, data.data.players[i].Color);
+                player.radius = data.data.players[i].Radius;
+                player.visualRadius = data.data.players[i].VisualRadius;
+                player.it = true;
+                player.velocity.X = data.data.players[i].Velocity.X;
+                player.velocity.Y = data.data.players[i].Velocity.Y;
+                player.x = data.data.players[i].X;
+                player.y = data.data.players[i].Y;
+                gameEngine.addPlayer(player);
+            }
+        }
+    });
     gameEngine.init(ctx);
     gameEngine.start();
+
 });
